@@ -1,604 +1,667 @@
 <!DOCTYPE html>
-<html lang="en" class="scroll-smooth">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ProServ Mortgage - Professional Servicing</title>
-    <!-- Tailwind CSS CDN -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Alpine.js CDN for interactivity -->
-    <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
-    <!-- Inter Font -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <title>Walid Swadhin | AI/ML Engineer</title>
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
         body {
             font-family: 'Inter', sans-serif;
+            background: #0a0a0a;
+            color: #fff;
+            overflow-x: hidden;
         }
-        /* Simple progress bar transition */
-        #progressBar {
-            transition: width 0.3s ease-in-out;
+        
+        .cursor-glow {
+            position: fixed;
+            width: 600px;
+            height: 600px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(99, 102, 241, 0.15), transparent 70%);
+            pointer-events: none;
+            transform: translate(-50%, -50%);
+            transition: opacity 0.3s;
+            z-index: 1;
         }
-        /* Hide scrollbar for step container */
-        .no-scrollbar::-webkit-scrollbar {
-            display: none;
+        
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a0a2e 100%);
+            overflow: hidden;
         }
-        .no-scrollbar {
-            -ms-overflow-style: none; /* IE and Edge */
-            scrollbar-width: none; /* Firefox */
+        
+        .hero::before {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 20% 50%, rgba(99, 102, 241, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(168, 85, 247, 0.1) 0%, transparent 50%);
         }
-    </style>
-    
-    <!-- Alpine.js Data and Functions -->
-    <script>
-        function mortgageSite() {
-            return {
-                view: 'home', // 'home', 'apply', 'support'
-                mobileMenuOpen: false,
-                
-                // --- Loan Application State ---
-                appStep: 1,
-                totalSteps: 4,
-                formData: {
-                    firstName: '',
-                    lastName: '',
-                    email: '',
-                    phone: '',
-                    ssn: '',
-                    employer: '',
-                    income: '',
-                    loanAmount: '',
-                    loanPurpose: 'Purchase',
-                    propertyAddress: '',
-                    consent: false
-                },
-                saveNotification: false,
-                
-                get appProgress() {
-                    if (this.appStep > this.totalSteps) return 100;
-                    return ((this.appStep - 1) / (this.totalSteps - 1)) * 100;
-                },
-
-                isStepValid() {
-                    // Simple validation logic
-                    if (this.appStep === 1) {
-                        return this.formData.firstName && this.formData.lastName && this.formData.email && this.formData.phone && this.formData.ssn;
-                    }
-                    if (this.appStep === 2) {
-                        return this.formData.employer && this.formData.income;
-                    }
-                    if (this.appStep === 3) {
-                        return this.formData.loanAmount && this.formData.propertyAddress;
-                    }
-                    return true; // Step 4 is just review
-                },
-
-                nextStep() {
-                    if (this.isStepValid() && this.appStep < this.totalSteps) {
-                        this.appStep++;
-                        window.scrollTo(0, 0);
-                    }
-                },
-                prevStep() {
-                    if (this.appStep > 1) {
-                        this.appStep--;
-                        window.scrollTo(0, 0);
-                    }
-                },
-                saveProgress() {
-                    // Simulation: In a real app, this would POST formData to a secure endpoint
-                    console.log('Saving progress (simulated):', this.formData);
-                    this.saveNotification = true;
-                    setTimeout(() => { this.saveNotification = false; }, 3000);
-                },
-                submissionMailto() {
-                    const recipient = 'loans@proserv.com'; // <-- UPDATE THIS EMAIL
-                    const subject = `New Loan Application - ${this.formData.lastName}`;
-                    let body = "New Loan Application Submitted:\n\n";
-                    body += `Name: ${this.formData.firstName} ${this.formData.lastName}\n`;
-                    body += `Email: ${this.formData.email}\n`;
-                    body += `Phone: ${this.formData.phone}\n`;
-                    body += `SSN (Partial): XXX-XX-${this.formData.ssn.slice(-4)}\n\n`;
-                    body += `Employer: ${this.formData.employer}\n`;
-                    body += `Income: $${this.formData.income}\n\n`;
-                    body += `Loan Amount: $${this.formData.loanAmount}\n`;
-                    body += `Purpose: ${this.formData.loanPurpose}\n`;
-                    body += `Property: ${this.formData.propertyAddress}\n\n`;
-                    body += `Consent Given: ${this.formData.consent}`;
-                    
-                    return `mailto:${recipient}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-                },
-                submitApplication() {
-                    if (!this.formData.consent) {
-                        // This function is triggered *before* the mailto link,
-                        // but we need to prevent the appStep change if consent is missing.
-                        // The 'disabled' class on the anchor tag should handle this visually.
-                        return; 
-                    }
-                    // This is a simulation. The mailto link will open the user's email client.
-                    // We'll show the success message optimistically.
-                    console.log('Submitting application (simulated):', this.formData);
-                    this.appStep = 5; // Go to success step
-                    window.scrollTo(0, 0);
-                },
-                resetForm() {
-                    this.appStep = 1;
-                    this.formData = {
-                        firstName: '', lastName: '', email: '', phone: '', ssn: '',
-                        employer: '', income: '', loanAmount: '', loanPurpose: 'Purchase',
-                        propertyAddress: '', consent: false
-                    };
-                },
-
-                // --- Support Page State ---
-                faqSearch: '',
-                allFaqs: [
-                    { q: 'How do I make a payment?', a: 'You can make a one-time payment or set up recurring payments through your online portal. You can also mail a check to our payment processing center at 123 Payment Rd, Anytown, USA.' },
-                    { q: 'Where can I find my loan statements?', a: 'All your monthly statements and annual tax documents are available under the "Documents" tab in your secure customer portal.' },
-                    { q: 'Can I change my payment due date?', a: 'Depending on your loan type, you may be eligible to change your payment due date. Please submit a support ticket with your request for our team to review.' },
-                    { q: 'What is refinancing?', a: 'Refinancing means replacing your current mortgage with a new one, often with a new interest rate, loan term, or loan amount. This can be done to lower your monthly payment, pay off your loan faster, or take cash out.' },
-                    { q: 'How do I apply for refinancing?', a: 'Simply click the "Apply Now" button on our website and select "Refinance" as your loan purpose. The application process is similar to a new purchase application.' }
-                ],
-                get filteredFaqs() {
-                    if (this.faqSearch === '') {
-                        return this.allFaqs;
-                    }
-                    return this.allFaqs.filter(faq => {
-                        return faq.q.toLowerCase().includes(this.faqSearch.toLowerCase()) || 
-                               faq.a.toLowerCase().includes(this.faqSearch.toLowerCase());
-                    });
-                },
-
-                // --- Support Ticket State ---
-                ticket: {
-                    name: '',
-                    email: '',
-                    subject: '',
-                    message: ''
-                },
-                ticketSuccess: false,
-                submitTicket(event) {
-                    // Simulation: In a real app, this would POST to a support desk API or backend
-                    console.log('Submitting ticket (simulated):', this.ticket);
-                    
-                    // As a simple, functional alternative, we'll create a mailto link
-                    const recipient = 'support@proserv.com'; // <-- UPDATE THIS EMAIL
-                    const subject = `Support Ticket: ${this.ticket.subject}`;
-                    let body = "New Support Ticket:\n\n";
-                    body += `Name: ${this.ticket.name}\n`;
-                    body += `Email: ${this.ticket.email}\n\n`;
-                    body += `Message:\n${this.ticket.message}`;
-                    
-                    // Open the user's email client
-                    window.location.href = `mailto:${recipient}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-
-                    // Show success message and reset form
-                    this.ticketSuccess = true;
-                    this.ticket = { name: '', email: '', subject: '', message: '' };
-                    event.target.reset(); // Clear the form fields
-                    setTimeout(() => { this.ticketSuccess = false; }, 5000);
-                }
+        
+        .hero-content {
+            text-align: center;
+            z-index: 2;
+            padding: 40px;
+            max-width: 1200px;
+        }
+        
+        .profile-wrapper {
+            position: relative;
+            display: inline-block;
+            margin-bottom: 40px;
+        }
+        
+        .profile-img {
+            width: 180px;
+            height: 180px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 4px solid rgba(99, 102, 241, 0.3);
+            box-shadow: 0 0 60px rgba(99, 102, 241, 0.4);
+            animation: float 3s ease-in-out infinite;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+        }
+        
+        .glowing-text {
+            font-size: 5rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #6366f1 0%, #a855f7 50%, #ec4899 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 20px;
+            animation: shimmer 3s infinite;
+            line-height: 1.2;
+        }
+        
+        @keyframes shimmer {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.8; }
+        }
+        
+        .subtitle {
+            font-size: 1.5rem;
+            color: #a0a0a0;
+            margin-bottom: 30px;
+            font-weight: 300;
+        }
+        
+        .cta-buttons {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 40px;
+        }
+        
+        .btn {
+            padding: 16px 40px;
+            border: none;
+            border-radius: 50px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-block;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #6366f1, #a855f7);
+            color: white;
+            box-shadow: 0 10px 30px rgba(99, 102, 241, 0.4);
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(99, 102, 241, 0.6);
+        }
+        
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.05);
+            color: white;
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+        }
+        
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(255, 255, 255, 0.3);
+            transform: translateY(-5px);
+        }
+        
+        .section {
+            padding: 120px 40px;
+            max-width: 1400px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 2;
+        }
+        
+        .section-title {
+            font-size: 3rem;
+            font-weight: 800;
+            margin-bottom: 60px;
+            text-align: center;
+            background: linear-gradient(135deg, #fff 0%, #a0a0a0 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 30px;
+            margin-top: 40px;
+        }
+        
+        .card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 40px;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+            overflow: hidden;
+            backdrop-filter: blur(10px);
+        }
+        
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(168, 85, 247, 0.1));
+            opacity: 0;
+            transition: opacity 0.4s;
+        }
+        
+        .card:hover {
+            transform: translateY(-15px) scale(1.02);
+            border-color: rgba(99, 102, 241, 0.5);
+            box-shadow: 0 30px 60px rgba(99, 102, 241, 0.3);
+        }
+        
+        .card:hover::before {
+            opacity: 1;
+        }
+        
+        .card-content {
+            position: relative;
+            z-index: 1;
+        }
+        
+        .card-icon {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #6366f1, #a855f7);
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 30px rgba(99, 102, 241, 0.4);
+        }
+        
+        .card h3 {
+            font-size: 1.5rem;
+            margin-bottom: 15px;
+            color: #fff;
+        }
+        
+        .card p, .card ul {
+            color: #a0a0a0;
+            line-height: 1.8;
+            font-size: 0.95rem;
+        }
+        
+        .card ul {
+            list-style: none;
+            padding-left: 0;
+        }
+        
+        .card li {
+            padding-left: 25px;
+            position: relative;
+            margin-bottom: 12px;
+        }
+        
+        .card li::before {
+            content: '→';
+            position: absolute;
+            left: 0;
+            color: #6366f1;
+            font-weight: bold;
+        }
+        
+        .project-card {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 40px;
+            margin-bottom: 30px;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .project-card::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(99, 102, 241, 0.1), transparent);
+            transition: left 0.5s;
+        }
+        
+        .project-card:hover {
+            transform: translateX(10px);
+            border-color: rgba(168, 85, 247, 0.5);
+            box-shadow: -20px 20px 60px rgba(168, 85, 247, 0.2);
+        }
+        
+        .project-card:hover::after {
+            left: 100%;
+        }
+        
+        .project-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        
+        .project-title {
+            font-size: 1.8rem;
+            color: #fff;
+            font-weight: 700;
+        }
+        
+        .project-date {
+            color: #6366f1;
+            font-size: 0.9rem;
+            font-weight: 600;
+            padding: 8px 16px;
+            background: rgba(99, 102, 241, 0.1);
+            border-radius: 20px;
+        }
+        
+        .skills-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 25px;
+        }
+        
+        .skill-tag {
+            display: inline-block;
+            padding: 8px 16px;
+            background: rgba(99, 102, 241, 0.1);
+            border: 1px solid rgba(99, 102, 241, 0.3);
+            border-radius: 20px;
+            margin: 5px;
+            font-size: 0.85rem;
+            color: #a0a0a0;
+            transition: all 0.3s;
+        }
+        
+        .skill-tag:hover {
+            background: rgba(99, 102, 241, 0.2);
+            color: #fff;
+            transform: translateY(-3px);
+        }
+        
+        .contact-section {
+            text-align: center;
+            padding: 100px 40px;
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, rgba(168, 85, 247, 0.1) 100%);
+        }
+        
+        .contact-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 30px;
+            max-width: 1000px;
+            margin: 60px auto 0;
+        }
+        
+        .contact-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 30px;
+            transition: all 0.3s;
+            text-decoration: none;
+            color: inherit;
+            display: block;
+        }
+        
+        .contact-card:hover {
+            transform: translateY(-10px) rotate(2deg);
+            border-color: rgba(99, 102, 241, 0.5);
+            box-shadow: 0 20px 40px rgba(99, 102, 241, 0.3);
+        }
+        
+        .contact-icon {
+            font-size: 2.5rem;
+            margin-bottom: 15px;
+        }
+        
+        .contact-card h3 {
+            font-size: 1.2rem;
+            margin-bottom: 10px;
+        }
+        
+        .contact-card p {
+            color: #a0a0a0;
+            font-size: 0.9rem;
+        }
+        
+        footer {
+            text-align: center;
+            padding: 40px;
+            background: #000;
+            color: #666;
+            font-size: 0.9rem;
+        }
+        
+        @media (max-width: 768px) {
+            .glowing-text {
+                font-size: 3rem;
+            }
+            
+            .section-title {
+                font-size: 2rem;
+            }
+            
+            .cards-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .section {
+                padding: 60px 20px;
             }
         }
-    </script>
+        
+        .scroll-indicator {
+            position: absolute;
+            bottom: 40px;
+            left: 50%;
+            transform: translateX(-50%);
+            animation: bounce 2s infinite;
+        }
+        
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% { transform: translateX(-50%) translateY(0); }
+            40% { transform: translateX(-50%) translateY(-20px); }
+            60% { transform: translateX(-50%) translateY(-10px); }
+        }
+        
+        .scroll-indicator::after {
+            content: '↓';
+            font-size: 2rem;
+            color: #6366f1;
+        }
+    </style>
 </head>
-<body class="bg-gray-50 text-gray-900 antialiased" x-data="mortgageSite()">
+<body>
+    <div class="cursor-glow" id="cursorGlow"></div>
     
-    <!-- Header -->
-    <header class="bg-white/90 backdrop-blur-sm shadow-sm sticky top-0 z-50">
-        <nav class="container mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between items-center h-16">
-                <!-- Logo -->
-                <a @click.prevent="view = 'home'; window.scrollTo(0,0)" href="#" class="flex-shrink-0 flex items-center gap-2">
-                    <svg class="h-8 w-8 text-indigo-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" />
-                    </svg>
-                    <span class="font-bold text-xl text-gray-900">ProServ Mortgage</span>
-                </a>
-                
-                <!-- Desktop Nav -->
-                <div class="hidden md:flex md:items-center md:space-x-8">
-                    <a @click.prevent="view = 'home'; window.scrollTo(0,0)" href="#" class="font-medium text-gray-600 hover:text-indigo-600" :class="{ 'text-indigo-600': view === 'home' }">Home</a>
-                    <a @click.prevent="view = 'apply'; window.scrollTo(0,0)" href="#" class="font-medium text-gray-600 hover:text-indigo-600" :class="{ 'text-indigo-600': view === 'apply' }">Apply Now</a>
-                    <a @click.prevent="view = 'support'; window.scrollTo(0,0)" href="#" class="font-medium text-gray-600 hover:text-indigo-600" :class="{ 'text-indigo-600': view === 'support' }">Customer Support</a>
-                </div>
-                
-                <!-- Call to Action (Desktop) -->
-                <div class="hidden md:block">
-                    <a @click.prevent="view = 'apply'; window.scrollTo(0,0)" href="#" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-lg text-white bg-indigo-600 hover:bg-indigo-700 shadow-sm">
-                        Start Application
-                    </a>
-                </div>
-
-                <!-- Mobile Menu Button -->
-                <div class="md:hidden">
-                    <button @click="mobileMenuOpen = !mobileMenuOpen" type="button" class="inline-flex items-center justify-center p-2 rounded-lg text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-500">
-                        <span class="sr-only">Open main menu</span>
-                        <svg x-show="!mobileMenuOpen" class="block h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
-                        </svg>
-                        <svg x-show="mobileMenuOpen" class="block h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                        </svg>
-                    </button>
+    <section class="hero">
+        <div class="hero-content">
+            <div class="profile-wrapper">
+                <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cdefs%3E%3ClinearGradient id='grad' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' style='stop-color:%236366f1;stop-opacity:1' /%3E%3Cstop offset='100%25' style='stop-color:%23a855f7;stop-opacity:1' /%3E%3C/linearGradient%3E%3C/defs%3E%3Ccircle cx='90' cy='90' r='90' fill='url(%23grad)'/%3E%3Ctext x='50%25' y='50%25' text-anchor='middle' dy='.3em' font-family='Arial' font-size='70' fill='%23fff' font-weight='bold'%3EWS%3C/text%3E%3C/svg%3E" alt="Walid Swadhin" class="profile-img">
+            </div>
+            <h1 class="glowing-text">Walid Swadhin</h1>
+            <p class="subtitle">AI/ML Researcher × Full-Stack Developer × Healthcare AI Innovator</p>
+            <p style="color: #808080; max-width: 700px; margin: 0 auto 20px; font-size: 1.1rem;">
+                Building next-gen AI solutions for medical diagnostics | Co-founder @DeepMed | RUET CSE
+            </p>
+            <div class="cta-buttons">
+                <a href="#projects" class="btn btn-primary">View My Work</a>
+                <a href="#contact" class="btn btn-secondary">Let's Connect</a>
+            </div>
+        </div>
+        <div class="scroll-indicator"></div>
+    </section>
+    
+    <section class="section" id="about">
+        <h2 class="section-title">What I Do</h2>
+        <div class="cards-grid">
+            <div class="card">
+                <div class="card-content">
+                    <div class="card-icon">🧠</div>
+                    <h3>AI/ML Research</h3>
+                    <p>Developing cutting-edge machine learning frameworks for healthcare, specializing in medical imaging analysis, deep learning architectures, and survival analysis models with >95% accuracy.</p>
                 </div>
             </div>
-
-            <!-- Mobile Menu -->
-            <div x-show="mobileMenuOpen" x-transition class="md:hidden" @click.away="mobileMenuOpen = false">
-                <div class="pt-2 pb-4 space-y-1">
-                    <a @click.prevent="view = 'home'; mobileMenuOpen = false; window.scrollTo(0,0)" href="#" class="block pl-3 pr-4 py-2 border-l-4 font-medium" :class="view === 'home' ? 'bg-indigo-50 border-indigo-500 text-indigo-700' : 'border-transparent text-gray-600 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-800'">Home</a>
-                    <a @click.prevent="view = 'apply'; mobileMenuOpen = false; window.scrollTo(0,0)" href="#" class="block pl-3 pr-4 py-2 border-l-4 font-medium" :class="view === 'apply' ? 'bg-indigo-50 border-indigo-500 text-indigo-700' : 'border-transparent text-gray-600 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-800'">Apply Now</a>
-                    <a @click.prevent="view = 'support'; mobileMenuOpen = false; window.scrollTo(0,0)" href="#" class="block pl-3 pr-4 py-2 border-l-4 font-medium" :class="view === 'support' ? 'bg-indigo-50 border-indigo-500 text-indigo-700' : 'border-transparent text-gray-600 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-800'">Customer Support</a>
+            
+            <div class="card">
+                <div class="card-content">
+                    <div class="card-icon">💻</div>
+                    <h3>Full-Stack Development</h3>
+                    <p>Building scalable web and mobile applications using modern tech stacks. From Django/Flask backends to React/Flutter frontends with cloud deployment on AWS/GCP.</p>
                 </div>
             </div>
-        </nav>
-    </header>
-
-    <!-- Main Content -->
-    <main>
-        <!-- Home View -->
-        <div x-show="view === 'home'" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100">
-            <!-- Hero Section -->
-            <div class="relative bg-white overflow-hidden">
-                <div class="container mx-auto px-4 sm:px-6 lg:px-8">
-                    <div class="relative z-10 py-16 sm:py-24 lg:py-32">
-                        <h1 class="text-4xl tracking-tight font-bold text-gray-900 sm:text-5xl md:text-6xl">
-                            <span class="block xl:inline">Your Partner in</span>
-                            <span class="block text-indigo-600 xl:inline"> Home Financing</span>
-                        </h1>
-                        <p class="mt-3 max-w-md text-base text-gray-500 sm:text-lg md:mt-5 md:text-xl md:max-w-3xl">
-                            Streamlined mortgage servicing and applications. We provide clear, straightforward solutions to help you manage your home loan with confidence.
-                        </p>
-                        <div class="mt-5 sm:mt-8 sm:flex sm:justify-start">
-                            <div class="rounded-lg">
-                                <a @click.prevent="view = 'apply'; window.scrollTo(0,0)" href="#" class="w-full flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-lg text-white bg-indigo-600 hover:bg-indigo-700 md:py-4 md:text-lg md:px-10">
-                                    Apply Now
-                                </a>
-                            </div>
-                            <div class="mt-3 sm:mt-0 sm:ml-3">
-                                <a @click.prevent="view = 'support'; window.scrollTo(0,0)" href="#" class="w-full flex items-center justify-center px-8 py-3 border border-indigo-100 text-base font-medium rounded-lg text-indigo-700 bg-indigo-50 hover:bg-indigo-100 md:py-4 md:text-lg md:px-10">
-                                    Get Support
-                                </a>
-                            </div>
-                        </div>
+            
+            <div class="card">
+                <div class="card-content">
+                    <div class="card-icon">🚀</div>
+                    <h3>Healthcare Innovation</h3>
+                    <p>Co-founding DeepMed to revolutionize medical diagnostic AI. Creating platforms that bridge the gap between AI research and clinical deployment with FDA-compliant pathways.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <section class="section" id="projects" style="background: rgba(255,255,255,0.01);">
+        <h2 class="section-title">Featured Projects</h2>
+        
+        <div class="project-card">
+            <div class="project-header">
+                <h3 class="project-title">🏥 DeepMed: AI Validation Platform</h3>
+                <span class="project-date">2024 - Present</span>
+            </div>
+            <p style="color: #a0a0a0; margin-bottom: 20px; font-size: 1.05rem;">Co-founder & Lead Developer</p>
+            <ul>
+                <li>Co-founded startup addressing $8B+ medical AI market with focus on diagnostic reliability</li>
+                <li>Architected multi-tenant SaaS platform serving 500+ clinicians and researchers</li>
+                <li>Built scalable cloud infrastructure handling 100K+ inference requests daily</li>
+                <li>Designed FDA-compliant validation framework for medical AI models</li>
+                <li>Tech Stack: Django, Flutter, AWS, TensorFlow, PyTorch, Docker, PostgreSQL</li>
+            </ul>
+        </div>
+        
+        <div class="project-card">
+            <div class="project-header">
+                <h3 class="project-title">🧬 Alzheimer's Prediction Framework</h3>
+                <span class="project-date">2023 - Present</span>
+            </div>
+            <p style="color: #a0a0a0; margin-bottom: 20px; font-size: 1.05rem;">AI/ML Researcher</p>
+            <ul>
+                <li>Achieved >95% accuracy in early Alzheimer's Disease prediction using deep learning</li>
+                <li>Processed 10,000+ brain MRI scans from OASIS and NACC neuroimaging datasets</li>
+                <li>Engineered hybrid 3D U-Net + CNN architecture with multi-head attention mechanism</li>
+                <li>Implemented ensemble model (XGBoost + DNN) with LSTM-based survival analysis</li>
+                <li>Applied SHAP for interpretable AI ensuring clinical trust and transparency</li>
+            </ul>
+        </div>
+        
+        <div class="project-card">
+            <div class="project-header">
+                <h3 class="project-title">🏡 Wonderlust - Rental Platform</h3>
+                <span class="project-date">2024</span>
+            </div>
+            <p style="color: #a0a0a0; margin-bottom: 20px; font-size: 1.05rem;">Full-Stack Developer</p>
+            <ul>
+                <li>Built Airbnb-inspired platform with 1000+ property listings</li>
+                <li>Implemented JWT authentication, real-time search, and review system</li>
+                <li>Designed responsive UI with interactive maps and image galleries</li>
+                <li>Tech Stack: Node.js, Express.js, MongoDB, EJS, Mapbox API</li>
+            </ul>
+        </div>
+    </section>
+    
+    <section class="section" id="skills">
+        <h2 class="section-title">Tech Arsenal</h2>
+        <div class="skills-container">
+            <div class="card">
+                <div class="card-content">
+                    <h3>🤖 AI & Machine Learning</h3>
+                    <div style="margin-top: 20px;">
+                        <span class="skill-tag">PyTorch</span>
+                        <span class="skill-tag">TensorFlow</span>
+                        <span class="skill-tag">Scikit-learn</span>
+                        <span class="skill-tag">Keras</span>
+                        <span class="skill-tag">OpenCV</span>
+                        <span class="skill-tag">SHAP</span>
+                        <span class="skill-tag">Pandas</span>
+                        <span class="skill-tag">NumPy</span>
                     </div>
                 </div>
             </div>
-
-            <!-- Services Section -->
-            <div class="py-16 bg-gray-50">
-                <div class="container mx-auto px-4 sm:px-6 lg:px-8">
-                    <div class="text-center">
-                        <h2 class="text-base font-semibold text-indigo-600 tracking-wide uppercase">Our Services</h2>
-                        <p class="mt-2 text-3xl font-bold text-gray-900 sm:text-4xl">
-                            A Better Mortgage Experience
-                        </p>
+            
+            <div class="card">
+                <div class="card-content">
+                    <h3>⚙️ Development</h3>
+                    <div style="margin-top: 20px;">
+                        <span class="skill-tag">Python</span>
+                        <span class="skill-tag">JavaScript</span>
+                        <span class="skill-tag">TypeScript</span>
+                        <span class="skill-tag">C++</span>
+                        <span class="skill-tag">Dart</span>
+                        <span class="skill-tag">SQL</span>
                     </div>
-                    <div class="mt-12 grid gap-8 md:grid-cols-3">
-                        <!-- Service 1 -->
-                        <div class="bg-white rounded-xl shadow-sm p-8">
-                            <div class="flex items-center justify-center h-12 w-12 rounded-lg bg-indigo-50 text-indigo-600">
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
-                                  <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m3.75 9v6m3-3H9m1.5-12H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
-                                </svg>
-                            </div>
-                            <h3 class="mt-5 text-lg font-medium text-gray-900">New Loan Applications</h3>
-                            <p class="mt-2 text-base text-gray-500">
-                                Our step-by-step application makes it easy to apply for a new mortgage or refinance your existing loan.
-                            </p>
-                        </div>
-                        <!-- Service 2 -->
-                        <div class="bg-white rounded-xl shadow-sm p-8">
-                            <div class="flex items-center justify-center h-12 w-12 rounded-lg bg-indigo-50 text-indigo-600">
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
-                                  <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h6m-6 2.25h6M3 16.5l1.5-1.5m1.5 1.5l1.5-1.5m1.5 1.5l1.5-1.5M16.5 16.5l1.5-1.5m1.5 1.5l1.5-1.5m1.5 1.5l1.5-1.5M19.5 12c0-1.232-.046-2.453-.138-3.662a4.006 4.006 0 00-3.7-3.7C14.453 4.546 13.232 4.5 12 4.5s-2.453.046-3.662.138a4.006 4.006 0 00-3.7 3.7C4.546 9.547 4.5 10.768 4.5 12s.046 2.453.138 3.662a4.006 4.006 0 003.7 3.7c1.209.092 2.43.138 3.662.138s2.453-.046 3.662-.138a4.006 4.006 0 003.7-3.7c.092-1.209.138-2.43.138-3.662z" />
-                                </svg>
-                            </div>
-                            <h3 class="mt-5 text-lg font-medium text-gray-900">Loan Servicing</h3>
-                            <p class="mt-2 text-base text-gray-500">
-                                Easily manage your existing loan. View statements, make payments, and access important documents all in one place.
-                            </p>
-                        </div>
-                        <!-- Service 3 -->
-                        <div class="bg-white rounded-xl shadow-sm p-8">
-                            <div class="flex items-center justify-center h-12 w-12 rounded-lg bg-indigo-50 text-indigo-600">
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
-                                  <path stroke-linecap="round" stroke-linejoin="round" d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9 5.25h.008v.008H12v-.008z" />
-                                </svg>
-                            </div>
-                            <h3 class="mt-5 text-lg font-medium text-gray-900">Dedicated Support</h3>
-                            <p class="mt-2 text-base text-gray-500">
-                                Our expert support team is here to help. Get answers to your questions through our FAQ or by submitting a support ticket.
-                            </p>
-                        </div>
+                </div>
+            </div>
+            
+            <div class="card">
+                <div class="card-content">
+                    <h3>🌐 Web & Mobile</h3>
+                    <div style="margin-top: 20px;">
+                        <span class="skill-tag">Django</span>
+                        <span class="skill-tag">Flask</span>
+                        <span class="skill-tag">Node.js</span>
+                        <span class="skill-tag">React</span>
+                        <span class="skill-tag">Flutter</span>
+                        <span class="skill-tag">Express.js</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card">
+                <div class="card-content">
+                    <h3>☁️ Cloud & DevOps</h3>
+                    <div style="margin-top: 20px;">
+                        <span class="skill-tag">AWS</span>
+                        <span class="skill-tag">GCP</span>
+                        <span class="skill-tag">Docker</span>
+                        <span class="skill-tag">Git</span>
+                        <span class="skill-tag">PostgreSQL</span>
+                        <span class="skill-tag">MongoDB</span>
                     </div>
                 </div>
             </div>
         </div>
-
-        <!-- Loan Application View -->
-        <div x-show="view === 'apply'" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100">
-            <div class="container mx-auto max-w-4xl px-4 sm:px-6 lg:px-8 py-16">
-                <h2 class="text-3xl font-bold text-gray-900 text-center">Loan Application</h2>
-                <p class="mt-2 text-lg text-gray-600 text-center">Complete your application in 4 simple steps.</p>
-
-                <!-- Progress Bar -->
-                <div class="mt-12">
-                    <div class="bg-gray-200 rounded-full h-2.5">
-                        <div id="progressBar" class="bg-indigo-600 h-2.5 rounded-full" :style="`width: ${appProgress}%`"></div>
-                    </div>
-                    <div class="flex justify-between text-sm font-medium text-gray-500 mt-2">
-                        <span :class="{ 'text-indigo-600': appStep >= 1 }">Personal</span>
-                        <span :class="{ 'text-indigo-600': appStep >= 2 }">Financial</span>
-                        <span :class="{ 'text-indigo-600': appStep >= 3 }">Loan Details</span>
-                        <span :class="{ 'text-indigo-600': appStep >= 4 }">Review</span>
-                    </div>
-                </div>
-
-                <!-- Form Steps -->
-                <div class="mt-8 bg-white rounded-xl shadow-lg overflow-hidden">
-                    <div class="p-6 sm:p-10">
-                        <!-- Step 1: Personal Info -->
-                        <div x-show="appStep === 1">
-                            <h3 class="text-xl font-semibold text-gray-900">Step 1: Personal Information</h3>
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
-                                <div>
-                                    <label for="firstName" class="block text-sm font-medium text-gray-700">First Name</label>
-                                    <input type="text" id="firstName" x-model="formData.firstName" required class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
-                                </div>
-                                <div>
-                                    <label for="lastName" class="block text-sm font-medium text-gray-700">Last Name</label>
-                                    <input type="text" id="lastName" x-model="formData.lastName" required class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
-                                </div>
-                                <div class="md:col-span-2">
-                                    <label for="email" class="block text-sm font-medium text-gray-700">Email Address</label>
-                                    <input type="email" id="email" x-model="formData.email" required class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
-                                </div>
-                                <div>
-                                    <label for="phone" class="block text-sm font-medium text-gray-700">Phone Number</label>
-                                    <input type="tel" id="phone" x-model="formData.phone" required class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
-                                </div>
-                                <div>
-                                    <label for="ssn" class="block text-sm font-medium text-gray-700">Social Security Number</label>
-                                    <input type="text" id="ssn" x-model="formData.ssn" placeholder="XXX-XX-XXXX" required class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Step 2: Financial Info -->
-                        <div x-show="appStep === 2">
-                            <h3 class="text-xl font-semibold text-gray-900">Step 2: Financial Information</h3>
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
-                                <div>
-                                    <label for="employer" class="block text-sm font-medium text-gray-700">Current Employer</label>
-                                    <input type="text" id="employer" x-model="formData.employer" required class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
-                                </div>
-                                <div>
-                                    <label for="income" class="block text-sm font-medium text-gray-700">Annual Income</label>
-                                    <div class="relative mt-1">
-                                        <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
-                                            <span class="text-gray-500 sm:text-sm">$</span>
-                                        </div>
-                                        <input type="number" id="income" x-model="formData.income" required class="block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 pl-7" placeholder="80000">
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Step 3: Loan Details -->
-                        <div x-show="appStep === 3">
-                            <h3 class="text-xl font-semibold text-gray-900">Step 3: Loan Details</h3>
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
-                                <div>
-                                    <label for="loanAmount" class="block text-sm font-medium text-gray-700">Loan Amount Requested</label>
-                                    <div class="relative mt-1">
-                                        <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
-                                            <span class="text-gray-500 sm:text-sm">$</span>
-                                        </div>
-                                        <input type="number" id="loanAmount" x-model="formData.loanAmount" required class="block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 pl-7" placeholder="300000">
-                                    </div>
-                                </div>
-                                <div>
-                                    <label for="loanPurpose" class="block text-sm font-medium text-gray-700">Loan Purpose</label>
-                                    <select id="loanPurpose" x-model="formData.loanPurpose" required class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
-                                        <option>Purchase</option>
-                                        <option>Refinance</option>
-                                    </select>
-                                </div>
-                                <div class="md:col-span-2">
-                                    <label for="propertyAddress" class="block text-sm font-medium text-gray-700">Property Address</label>
-                                    <input type="text" id="propertyAddress" x-model="formData.propertyAddress" required class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500" placeholder="123 Main St, Anytown, USA">
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Step 4: Review & Submit -->
-                        <div x-show="appStep === 4">
-                            <h3 class="text-xl font-semibold text-gray-900">Step 4: Review & Submit</h3>
-                            <div class="mt-6 space-y-4">
-                                <h4 class="font-medium text-gray-800">Personal Information</h4>
-                                <dl class="divide-y divide-gray-200 rounded-lg border border-gray-200">
-                                    <div class="flex justify-between p-3 text-sm">
-                                        <dt class="font-medium text-gray-600">Name</dt>
-                                        <dd class="text-gray-900" x-text="`${formData.firstName} ${formData.lastName}`"></dd>
-                                    </div>
-                                    <div class="flex justify-between p-3 text-sm">
-                                        <dt class="font-medium text-gray-600">Email</dt>
-                                        <dd class="text-gray-900" x-text="formData.email"></dd>
-                                    </div>
-                                    <div class="flex justify-between p-3 text-sm">
-                                        <dt class="font-medium text-gray-600">Phone</dt>
-                                        <dd class="text-gray-900" x-text="formData.phone"></dd>
-                                    </div>
-                                </dl>
-                                
-                                <h4 class="font-medium text-gray-800 pt-4">Loan Details</h4>
-                                <dl class="divide-y divide-gray-200 rounded-lg border border-gray-200">
-                                    <div class="flex justify-between p-3 text-sm">
-                                        <dt class="font-medium text-gray-600">Loan Amount</dt>
-                                        <dd class="text-gray-900" x-text="`$${formData.loanAmount}`"></dd>
-                                    </div>
-                                    <div class="flex justify-between p-3 text-sm">
-                                        <dt class="font-medium text-gray-600">Purpose</dt>
-                                        <dd class="text-gray-900" x-text="formData.loanPurpose"></dd>
-                                    </div>
-                                </dl>
-
-                                <div class="relative flex items-start pt-4">
-                                    <div class="flex h-5 items-center">
-                                        <input id="consent" type="checkbox" x-model="formData.consent" class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500">
-                                    </div>
-                                    <div class="ml-3 text-sm">
-                                        <label for="consent" class="font-medium text-gray-700">I confirm that the information provided is accurate and agree to the terms and conditions.</label>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Success Message -->
-                        <div x-show="appStep === 5">
-                            <div class="text-center py-12">
-                                <svg class="w-16 h-16 text-green-500 mx-auto" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                                  <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                </svg>
-                                <h3 class="mt-4 text-2xl font-semibold text-gray-900">Application Submitted!</h3>
-                                <p class="mt-2 text-gray-600">
-                                    (Simulation) Your application has been sent to our loan officers. We will contact you at 
-                                    <span class="font-medium text-gray-900" x-text="formData.email"></span> within 2-3 business days.
-                                </p>
-                                <button @click="resetForm()" type="button" class="mt-8 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-lg text-white bg-indigo-600 hover:bg-indigo-700 shadow-sm">
-                                    Start New Application
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Form Navigation -->
-                    <div class="bg-gray-50 px-6 py-4 flex items-center justify-between" x-show="appStep <= totalSteps">
-                        <button @click="saveProgress()" type="button" class="text-sm font-medium text-indigo-600 hover:text-indigo-500">
-                            Save Mid-Process
-                        </button>
-
-                        <div class="flex gap-4">
-                            <button @click="prevStep()" type="button" class="px-5 py-2.5 text-sm font-medium rounded-lg text-gray-700 bg-white border border-gray-300 hover:bg-gray-50 shadow-sm" x-show="appStep > 1">
-                                Previous
-                            </button>
-                            <button @click="nextStep()" type="button" class="px-5 py-2.5 text-sm font-medium rounded-lg text-white bg-indigo-600 hover:bg-indigo-700 shadow-sm" x-show="appStep < totalSteps" :disabled="!isStepValid()" :class="{ 'opacity-50 cursor-not-allowed': !isStepValid() }">
-                                Next
-                            </button>
-                            <a :href="submissionMailto()" @click="submitApplication()" class="inline-flex items-center px-5 py-2.5 text-sm font-medium rounded-lg text-white bg-green-600 hover:bg-green-700 shadow-sm" x-show="appStep === totalSteps" :class="{ 'opacity-50 cursor-not-allowed': !formData.consent }">
-                                Submit Application
-                            </a>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- "Saved" Notification -->
-                <div x-show="saveNotification" x-transition x-cloak
-                    class="fixed bottom-5 right-5 bg-gray-900 text-white py-3 px-5 rounded-lg shadow-lg">
-                    (Simulation) Progress has been saved.
-                </div>
-            </div>
+    </section>
+    
+    <section class="contact-section" id="contact">
+        <h2 class="section-title">Let's Build Something Amazing</h2>
+        <p style="color: #a0a0a0; font-size: 1.2rem; max-width: 700px; margin: 0 auto;">
+            Open to AI/ML roles, full-stack positions, and exciting collaborations. Let's connect!
+        </p>
+        
+        <div class="contact-grid">
+            <a href="mailto:waccub3@gmail.com" class="contact-card">
+                <div class="contact-icon">📧</div>
+                <h3>Email</h3>
+                <p>waccub3@gmail.com</p>
+            </a>
+            
+            <a href="https://github.com/walidsw" target="_blank" class="contact-card">
+                <div class="contact-icon">💻</div>
+                <h3>GitHub</h3>
+                <p>@walidsw</p>
+            </a>
+            
+            <a href="https://linkedin.com/in/walid-waccub-swadhin" target="_blank" class="contact-card">
+                <div class="contact-icon">💼</div>
+                <h3>LinkedIn</h3>
+                <p>Walid Waccub Swadhin</p>
+            </a>
+            
+            <a href="tel:+8801771822407" class="contact-card">
+                <div class="contact-icon">📱</div>
+                <h3>Phone</h3>
+                <p>+880 177 182 2407</p>
+            </a>
         </div>
-
-        <!-- Customer Support View -->
-        <div x-show="view === 'support'" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100">
-            <div class="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-16">
-                <div class="text-center">
-                    <h2 class="text-3xl font-bold text-gray-900">Customer Support</h2>
-                    <p class="mt-2 text-lg text-gray-600">We're here to help. Find answers below or submit a ticket.</p>
-                </div>
-
-                <div class="mt-16 grid grid-cols-1 lg:grid-cols-3 gap-16">
-                    <!-- FAQ Section -->
-                    <div class="lg:col-span-2">
-                        <h3 class="text-2xl font-semibold text-gray-900">Frequently Asked Questions</h3>
-                        
-                        <!-- FAQ Search -->
-                        <div class="mt-6">
-                            <label for="faqSearch" class="sr-only">Search FAQs</label>
-                            <input type="search" id="faqSearch" x-model="faqSearch" placeholder="Search for answers..." class="block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
-                        </div>
-
-                        <!-- FAQ List -->
-                        <div class="mt-8 space-y-4">
-                            <template x-for="faq in filteredFaqs" :key="faq.q">
-                                <details class="bg-white shadow-sm rounded-lg p-5 group" :open="faqSearch.length > 0">
-                                    <summary class="font-medium text-gray-900 cursor-pointer list-none flex justify-between items-center">
-                                        <span x-text="faq.q"></span>
-                                        <svg class="w-5 h-5 text-gray-400 group-open:rotate-180 transition-transform" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                                          <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
-                                        </svg>
-                                    </summary>
-                                    <p class="text-gray-600 mt-3" x-text="faq.a"></p>
-                                </details>
-                            </template>
-                            <div x-show="filteredFaqs.length === 0" class="text-center text-gray-500 py-8">
-                                No questions found matching your search.
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Support Ticket Form -->
-                    <div class="lg:col-span-1">
-                        <div class="bg-white rounded-xl shadow-lg p-6 sm:p-8">
-                            <h3 class="text-2xl font-semibold text-gray-900">Submit a Ticket</h3>
-                            <form @submit.prevent="submitTicket" class="mt-6 space-y-5">
-                                <div>
-                                    <label for="ticketName" class="block text-sm font-medium text-gray-700">Full Name</label>
-                                    <input type="text" id="ticketName" x-model="ticket.name" required class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
-                                </div>
-                                <div>
-                                    <label for="ticketEmail" class="block text-sm font-medium text-gray-700">Email</label>
-                                    <input type="email" id="ticketEmail" x-model="ticket.email" required class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
-                                </div>
-                                <div>
-                                    <label for="ticketSubject" class="block text-sm font-medium text-gray-700">Subject</label>
-                                    <input type="text" id="ticketSubject" x-model="ticket.subject" required class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
-                                </div>
-                                <div>
-                                    <label for="ticketMessage" class="block text-sm font-medium text-gray-700">Message</label>
-                                    <textarea id="ticketMessage" rows="5" x-model="ticket.message" required class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"></textarea>
-                                </div>
-                                <div>
-                                    <button type="submit" class="w-full flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-lg text-white bg-indigo-600 hover:bg-indigo-700 shadow-sm">
-                                        Send Message
-                                    </button>
-                                </div>
-                            </form>
-                            <!-- Ticket Success Message -->
-                            <div x-show="ticketSuccess" x-transition class="mt-6 text-center text-green-700">
-                                (Simulation) Your ticket has been sent. We'll reply soon.
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </main>
-
-    <!-- Footer -->
-    <footer class="bg-white border-t border-gray-200">
-        <div class="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-12">
-            <div class="flex flex-col md:flex-row justify-between items-center">
-                <div class="flex items-center gap-2">
-                    <svg class="h-6 w-6 text-indigo-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" />
-                    </svg>
-                    <span class="font-bold text-lg text-gray-900">ProServ Mortgage</span>
-                </div>
-                <div class="flex space-x-6 mt-4 md:mt-0">
-                    <a href="#" class="text-sm text-gray-500 hover:text-gray-900">Privacy Policy</a>
-                    <a href="#" class="text-sm text-gray-500 hover:text-gray-900">Terms of Service</a>
-                </div>
-            </div>
-            <div class="mt-8 text-center text-sm text-gray-400">
-                &copy; 2025 ProServ Mortgage, LLC. All rights reserved. NMLS ID 12345.
-            </div>
-        </div>
+    </section>
+    
+    <footer>
+        <p>© 2024 Walid Swadhin. Crafted with passion for innovation.</p>
+        <p style="margin-top: 10px;">Transforming healthcare through AI, one model at a time.</p>
     </footer>
     
+    <script>
+        const cursorGlow = document.getElementById('cursorGlow');
+        
+        document.addEventListener('mousemove', (e) => {
+            cursorGlow.style.left = e.clientX + 'px';
+            cursorGlow.style.top = e.clientY + 'px';
+        });
+        
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            });
+        });
+        
+        const cards = document.querySelectorAll('.card, .project-card');
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            });
+        }, { threshold: 0.1 });
+        
+        cards.forEach(card => {
+            card.style.opacity = '0';
+            card.style.transform = 'translateY(30px)';
+            card.style.transition = 'all 0.6s ease-out';
+            observer.observe(card);
+        });
+    </script>
 </body>
 </html>
